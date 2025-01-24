@@ -3,11 +3,20 @@
 
 RWStructuredBuffer<float3> vels;
 RWStructuredBuffer<float3> poss;
+RWStructuredBuffer<float> mass;
 float GConst;
-
-
+uint length;
+uint stride;
 [numthreads(10,1,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
-    
+    vels.GetDimensions(length, stride);
+    for (int i = 0; i < length; i++)
+    {
+        if (i == id.x)
+        {
+            continue;
+        }
+        vels[id.x] += GConst * mass[id.x] * mass[i] * (poss[i] - poss[id.x]) / (pow(length((poss[i] - poss[id.x])), 3f));
+    }
 }
