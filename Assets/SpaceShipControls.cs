@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering;
 using static UnityEngine.InputSystem.Controls.AxisControl;
@@ -15,12 +16,14 @@ public class SpaceshipController : MonoBehaviour
     public float deadZone = 0.1f;
     public float rotationCurve = 2f;
 
-
+    public float acceleration = 10f;
+    public float maxSpeed = 100f;
 
     public float pitch = 0f;
     public float yaw = 0f;
     public float roll = 0f;
 
+    private Vector3 velocity = Vector3.zero;
     private Vector3 currentRotationVelocity;
     private Vector2 screenCenter;
 
@@ -38,26 +41,28 @@ public class SpaceshipController : MonoBehaviour
     }
 
     void UpdateMovement() {
-        // Move forward and backward
-        float move = Input.GetAxis("Vertical") * moveSpeed * Time.deltaTime;
-        transform.Translate(Vector3.forward * move);
+        Vector3 accelerationVector = Vector3.zero;
+
+        float moveInput = Input.GetAxis("Vertical");
+        accelerationVector += acceleration * moveInput * transform.forward;
 
         if (Input.GetKey(KeyCode.D))
-        {
-            transform.Translate(Vector3.right * strafeSpeed * Time.deltaTime);
-        }
+            accelerationVector += transform.right * acceleration;
         if (Input.GetKey(KeyCode.A))
-        {
-            transform.Translate(Vector3.left * strafeSpeed * Time.deltaTime);
-        }
+            accelerationVector -= transform.right * acceleration;
         if (Input.GetKey(KeyCode.LeftShift))
-        {
-            transform.Translate(Vector3.up * verticalSpeed * Time.deltaTime);
-        }
+            accelerationVector += transform.up * acceleration;
         if (Input.GetKey(KeyCode.LeftControl))
-        {
-            transform.Translate(Vector3.down * verticalSpeed * Time.deltaTime);
-        }
+            accelerationVector -= transform.up * acceleration;
+
+
+        velocity += accelerationVector * Time.deltaTime;
+
+        // Clamp velocity to max speed
+        velocity = Vector3.ClampMagnitude(velocity, maxSpeed);
+
+        // Move the ship using accumulated velocity
+        transform.position += velocity * Time.deltaTime;
     }
 
     float ApplyRotationCurve(float input)
@@ -83,14 +88,23 @@ public class SpaceshipController : MonoBehaviour
             targetRotationVelocity.y = 0;
         }
 
-        currentRotationVelocity = Vector3.Lerp(
+
+        if (Input.GetKey(KeyCode.Mouse0))
+        {
+            currentRotationVelocity = Vector3.Lerp(
             currentRotationVelocity,
             targetRotationVelocity,
-            Time.deltaTime * rotationSmoothness
-        );
+            Time.deltaTime * rotationSmoothness);
+        }
+        else
+        {
+            targetRotationVelocity.x = 0;
+            targetRotationVelocity.y = 0;
+        }
 
-        // Apply rotations
-        transform.Rotate(Vector3.left * currentRotationVelocity.x * Time.deltaTime, Space.Self);
+
+            // Apply rotations
+            transform.Rotate(Vector3.left * currentRotationVelocity.x * Time.deltaTime, Space.Self);
         transform.Rotate(Vector3.up * currentRotationVelocity.y * Time.deltaTime, Space.Self);
         transform.Rotate(Vector3.forward * currentRotationVelocity.z * Time.deltaTime, Space.Self);
 
