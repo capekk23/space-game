@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Linq;
 using Unity.Mathematics;
+using System;
 
 public class RBMan : MonoBehaviour
 {
@@ -30,7 +31,7 @@ public class RBMan : MonoBehaviour
         Forces.SetBuffer(0, "poss", bufferPoss);
         Forces.SetBuffer(0, "mass", bufferMass);
         Forces.SetFloat("GConst", GConst);
-        Forces.Dispatch(0, RBs.Length/10, 1, 1);
+        Forces.Dispatch(0, 3, 1, 1);
         bufferVels.GetData(vels);
         bufferPoss.GetData(poss);
         bufferMass.GetData(mass);
