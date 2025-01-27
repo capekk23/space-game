@@ -10,13 +10,13 @@ uint stride;
 [numthreads(10,1,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
-    vels.GetDimensions(length, stride);
     for(int i = 0; i < length; i++)
     {
         if (i == id.x)
         {
             continue;
         }
-        vels[id.x] += GConst * mass[id.x] * mass[i] * (poss[i] - poss[id.x]) / (pow(length((poss[i] - poss[id.x])), 3f));
+        float distCubed = pow(length((poss[i] - poss[id.x])), 3f);
+        vels[id.x] += GConst * mass[id.x] * mass[i] * (poss[i] - poss[id.x]) / distCubed;
     }
 }
