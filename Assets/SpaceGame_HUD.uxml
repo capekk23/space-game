@@ -1,0 +1,6 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:VisualElement style="flex-grow: 1;">
+        <ui:ProgressBar value="22" title="throttle" focusable="false" enabled="true" style="-unity-background-image-tint-color: rgb(0, 193, 78); rotate: 90deg; flex-direction: column-reverse; position: relative; bottom: 0; justify-content: flex-start; align-items: auto; max-height: none; text-overflow: clip; white-space: normal; scale: 1 1; translate: -300px 100px; transform-origin: center;" />
+        <ui:TextField label="speed" placeholder-text="filler text" value="0" password="false" hide-placeholder-on-focus="true" style="height: 36px; width: 216px; translate: 50px 350px; flex-shrink: 0;" />
+    </ui:VisualElement>
+</ui:UXML>
