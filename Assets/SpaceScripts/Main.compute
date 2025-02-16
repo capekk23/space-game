@@ -1,0 +1,75 @@
+#pragma kernel CSMain
+
+#define CHUNK_SIZE 64
+#define MAX_CHUNKS 32
+#define FLAG_MASK 0xff
+#define FLAG_EMPTY 0x00
+#define FLAG_USED 0xff
+#define FLAG_OUT_OF_SPACE 0xEE
+
+
+
+struct Particle
+{
+    float3 position;
+    float3 velocity;
+    bool structured;
+};
+static Particle EMPTY[CHUNK_SIZE];
+struct _3DChunk
+{
+//
+// uint -> 0x<xx><yy><zz><FLAG>
+//            ^^ coords    ^^ flag
+// FLAGS :
+    //0x00 - unused chunk, default
+    //0xff - chunk in use
+    //
+//
+    uint x;
+    Particle y[CHUNK_SIZE];
+};
+uint hash(uint k, uint bufferSize)
+{
+    k ^= k >> 16;
+    k *= 0x85ebca6b;
+    k ^= k >> 13;
+    k *= 0xc2b2ae35;
+    k ^= k >> 16;
+    return k & (bufferSize - 1);
+}
+/// HASHMAP
+// Odvozeno z: https://github.com/b0nes164/SimpleComputeShaderHashTable/tree/main
+class HASHMAP
+{
+    _3DChunk Map[MAX_CHUNKS];
+    _3DChunk
+        HashLookup(
+        uint key, uint bufferSize)
+    {
+        uint slot = hash(key, bufferSize);
+        uint counter = 0;
+        while (true)
+        {
+            if ((Map[slot].x == key) | (Map[slot].x & FLAG_MASK == FLAG_EMPTY))
+            {
+                return Map[slot];
+            }
+            slot = (slot + 1) & (bufferSize - 1);
+            if (counter == CHUNK_SIZE)
+            {
+                _3DChunk FULL = { 0xEE, EMPTY };
+                return FULL;
+            }
+            counter++;
+        }
+    }
+};
+
+RWStructuredBuffer<HASHMAP> MAP;
+
+[numthreads(8,8,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    
+}
